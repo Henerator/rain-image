@@ -22,13 +22,15 @@ const FPSManager = {
     }
 };
 
+const gui = new dat.GUI();
+
 let screenSize;
 let screenEdges;
 let photoEdges;
 let photoImage;
 let photoPixels;
 
-const drops = [];
+let drops = [];
 
 const colors = {
     background: 'rgba(10, 10, 10, 0.1)',
@@ -42,10 +44,9 @@ const settings = {
     gravityForce: 0.05,
     count: 1200,
     rainDrop: {
-        minLength: 7,
-        maxLength: 12,
-        minSpeed: 1,
-        maxSpeed: 4,
+        length: 10,
+        initialMinSpeed: 1,
+        initialMaxSpeed: 4,
         width: 1,
     },
 };
@@ -83,8 +84,8 @@ function updateScreenSize() {
 function createDrop(positionStrategy) {
     const { x, y } = positionStrategy.getPosition();
     const speedX = 0;
-    const speedY = random(settings.rainDrop.minSpeed, settings.rainDrop.maxSpeed);
-    const length = random(settings.rainDrop.minLength, settings.rainDrop.maxLength);
+    const speedY = random(settings.rainDrop.initialMinSpeed, settings.rainDrop.initialMaxSpeed);
+    const length = settings.rainDrop.length;
     return new Drop(x, y, speedX, speedY, length);
 }
 
@@ -172,9 +173,30 @@ function loadCustomImage(path) {
     });
 }
 
+function handleCountChange(count) {
+    const currentCount = drops.length;
+    if (currentCount >= count) {
+        drops = drops.slice(0, count);
+    } else {
+        generateDrops(settings.count - currentCount);
+    } 
+}
+
+function generateGUISettings() {
+    gui.add(settings, 'count', 100, 2000)
+        .step(100)
+        .onChange(handleCountChange);
+    gui.add(settings, 'gravityForce', 0, 0.1).step(0.01);
+    gui.add(settings.rainDrop, 'length', 2, 30).step(1);
+    gui.add(settings.rainDrop, 'width', 1, 5).step(1);
+
+    gui.add(settings, 'showFPS');
+}
+
 function setup() {
     createCanvas();
     updateScreenSize();
+    generateGUISettings();
 
     window.addEventListener('resize', () => {
         updateScreenSize();
