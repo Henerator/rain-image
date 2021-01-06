@@ -44,7 +44,8 @@ const settings = {
     gravityForce: 0.05,
     count: 1200,
     rainDrop: {
-        length: 10,
+        minLength: 7,
+        maxLength: 12,
         initialMinSpeed: 1,
         initialMaxSpeed: 4,
         width: 1,
@@ -85,7 +86,7 @@ function createDrop(positionStrategy) {
     const { x, y } = positionStrategy.getPosition();
     const speedX = 0;
     const speedY = random(settings.rainDrop.initialMinSpeed, settings.rainDrop.initialMaxSpeed);
-    const length = settings.rainDrop.length;
+    const length = random(settings.rainDrop.minLength, settings.rainDrop.maxLength);
     return new Drop(x, y, speedX, speedY, length);
 }
 
@@ -187,7 +188,8 @@ function generateGUISettings() {
         .step(100)
         .onChange(handleCountChange);
     gui.add(settings, 'gravityForce', 0, 0.1).step(0.01);
-    gui.add(settings.rainDrop, 'length', 2, 30).step(1);
+    gui.add(settings.rainDrop, 'minLength', 2, 12).step(1);
+    gui.add(settings.rainDrop, 'maxLength', 12, 30).step(1);
     gui.add(settings.rainDrop, 'width', 1, 5).step(1);
 
     gui.add(settings, 'showFPS');
