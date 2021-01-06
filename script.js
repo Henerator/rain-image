@@ -6,6 +6,22 @@ class Drop {
     }
 }
 
+const FPSManager = {
+    interval: 1000,
+    lastTime: new Date(),
+    frames: 0,
+    count: 0,
+    update: function () {
+        this.count++;
+        const time = new Date();
+        if (time - this.lastTime > this.interval) {
+            this.frames = this.count;
+            this.count = 0;
+            this.lastTime = time;
+        }
+    }
+};
+
 let screenSize;
 let screenEdges;
 let photoEdges;
@@ -17,9 +33,11 @@ const drops = [];
 const colors = {
     background: 'rgba(10, 10, 10, 0.1)',
     rainDrop: 'rgba(255, 255, 255, 0.2)',
+    fpsText: '#ed225d',
 };
 
 const settings = {
+    showFPS: true,
     screenEdgeMargin: 0,
     gravityForce: 0.05,
     count: 1200,
@@ -176,6 +194,12 @@ function clearCanvas() {
     rect(0, 0, screenSize.width, screenSize.height);
 }
 
+function drawFPS() {
+    textSize(32);
+    fill(colors.fpsText);
+    text(FPSManager.frames, 10, 35);
+}
+
 function drawDrops() {
     strokeWeight(settings.rainDrop.width);
 
@@ -192,6 +216,7 @@ function draw() {
     clearCanvas();
 
     drawDrops();
+    settings.showFPS && drawFPS();
 
     update();
 }
@@ -213,6 +238,11 @@ function updateDrops() {
     }
 }
 
+function updateFPS() {
+    FPSManager.update();
+}
+
 function update() {
+    updateFPS();
     updateDrops();
 }
