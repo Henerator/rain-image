@@ -37,7 +37,7 @@ const colors = {
 };
 
 const settings = {
-    showFPS: true,
+    showFPS: false,
     screenEdgeMargin: 0,
     gravityForce: 0.05,
     count: 1200,
@@ -196,6 +196,7 @@ function clearCanvas() {
 
 function drawFPS() {
     textSize(32);
+    noStroke();
     fill(colors.fpsText);
     text(FPSManager.frames, 10, 35);
 }
