@@ -183,14 +183,17 @@ function handleCountChange(count) {
     } 
 }
 
-function generateGUISettings() {
+function generateGUISettings() {   
     gui.add(settings, 'count', 100, 2000)
         .step(100)
         .onChange(handleCountChange);
     gui.add(settings, 'gravityForce', 0.01, 0.1).step(0.01);
-    gui.add(settings.rainDrop, 'minLength', 2, 12).step(1);
-    gui.add(settings.rainDrop, 'maxLength', 12, 30).step(1);
-    gui.add(settings.rainDrop, 'width', 1, 5).step(1);
+
+    const dropFolder = gui.addFolder('Drop');
+    dropFolder.add(settings.rainDrop, 'minLength', 2, 12).step(1);
+    dropFolder.add(settings.rainDrop, 'maxLength', 12, 30).step(1);
+    dropFolder.add(settings.rainDrop, 'width', 1, 5).step(1);
+    dropFolder.open();
 
     gui.add(settings, 'showFPS');
 }
