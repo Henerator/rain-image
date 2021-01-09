@@ -26,9 +26,9 @@ const gui = new dat.GUI();
 
 let screenSize;
 let screenEdges;
-let photoEdges;
-let photoImage;
-let photoPixels;
+let imageEdges;
+let imagePhoto;
+let imagePixels;
 
 let drops = [];
 
@@ -43,6 +43,9 @@ const settings = {
     screenEdgeMargin: 0,
     gravityForce: 0.05,
     count: 1200,
+    image: {
+        precision: 1,
+    },
     rainDrop: {
         minLength: 7,
         maxLength: 12,
@@ -101,40 +104,40 @@ function getRGBColorString(r, g, b) {
     return `rgb(${r},${g},${b})`;
 }
 
-function getPhotoEdges(image) {
+function getImageEdges(image) {
     const centerX = screenSize.width / 2;
-    const photoScale = screenSize.height / image.height;
+    const imageScale = screenSize.height / image.height;
 
-    const scaledPhotoSize = {
-        width: image.width * photoScale,
-        height: image.height * photoScale,
+    const scaledImageSize = {
+        width: image.width * imageScale,
+        height: image.height * imageScale,
     };
 
     return {
         top: 0,
-        bottom: scaledPhotoSize.height,
-        left: centerX - scaledPhotoSize.width / 2,
-        right: centerX + scaledPhotoSize.width / 2,
-        width: scaledPhotoSize.width,
-        height: scaledPhotoSize.height,
+        bottom: scaledImageSize.height,
+        left: centerX - scaledImageSize.width / 2,
+        right: centerX + scaledImageSize.width / 2,
+        width: scaledImageSize.width,
+        height: scaledImageSize.height,
     };
 }
 
-function getImagePixels(image, photoEdges, detail = 1) {
+function getImagePixels(image, imageEdges, precision) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     canvas.width = screenSize.width;
     canvas.height = screenSize.height;
 
-    context.drawImage(image, 0, 0, image.width, image.height, photoEdges.left, 0, photoEdges.width, photoEdges.height);
+    context.drawImage(image, 0, 0, image.width, image.height, imageEdges.left, 0, imageEdges.width, imageEdges.height);
 
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     let pixels = [];
-    for (let y = 0; y < imageData.height; y += detail) {
+    for (let y = 0; y < imageData.height; y += precision) {
         let row = [];
         const rowOffset = y * 4 * imageData.width;
 
-        for (let x = 0; x < imageData.width; x += detail) {
+        for (let x = 0; x < imageData.width; x += precision) {
             const columnOffset = rowOffset + x * 4;
             const r = imageData.data[columnOffset];
             const g = imageData.data[columnOffset + 1];
@@ -149,27 +152,29 @@ function getImagePixels(image, photoEdges, detail = 1) {
     return pixels;
 }
 
-function getPhotoPixelColor(x, y) {
-    if (!photoPixels || photoPixels.length === 0 ||
-        x < photoEdges.left || x >= photoEdges.right ||
-        y < photoEdges.top || y >= photoEdges.bottom
+function getImagePixelColor(x, y) {
+    if (imagePixels && imagePixels.length &&
+        x >= imageEdges.left && x < imageEdges.right &&
+        y >= imageEdges.top && y < imageEdges.bottom
     ) {
-        return colors.rainDrop;
+        const precisionX = Math.floor(x / settings.image.precision);
+        const precisionY = Math.floor(y / settings.image.precision);
+        return imagePixels[precisionY][precisionX];
     }
 
-    return photoPixels[y][x];
+    return colors.rainDrop;
 }
 
 function updateImageData() {
-    photoEdges = getPhotoEdges(photoImage);
-    photoPixels = getImagePixels(photoImage, photoEdges);
+    imageEdges = getImageEdges(imagePhoto);
+    imagePixels = getImagePixels(imagePhoto, imageEdges, settings.image.precision);
 }
 
 function loadCustomImage(path) {
     const imageSource = new Image();
     imageSource.src = path;
     imageSource.addEventListener('load', function () {
-        photoImage = this;
+        imagePhoto = this;
         updateImageData();
     });
 }
@@ -180,10 +185,10 @@ function handleCountChange(count) {
         drops = drops.slice(0, count);
     } else {
         generateDrops(settings.count - currentCount);
-    } 
+    }
 }
 
-function generateGUISettings() {   
+function generateGUISettings() {
     gui.add(settings, 'count', 100, 2000)
         .step(100)
         .onChange(handleCountChange);
@@ -194,6 +199,12 @@ function generateGUISettings() {
     dropFolder.add(settings.rainDrop, 'maxLength', 12, 30).step(1);
     dropFolder.add(settings.rainDrop, 'width', 1, 5).step(1);
     dropFolder.open();
+
+    const imageFolder = gui.addFolder('Image');
+    imageFolder.add(settings.image, 'precision', 1, 20)
+        .step(1)
+        .onChange(updateImageData);
+    imageFolder.open();
 
     gui.add(settings, 'showFPS');
 }
@@ -234,7 +245,7 @@ function drawDrops() {
     drops.forEach(drop => {
         const x = Math.floor(drop.position.x);
         const y = Math.floor(drop.position.y);
-        const color = getPhotoPixelColor(x, y);
+        const color = getImagePixelColor(x, y);
         stroke(color);
         line(drop.position.x, drop.position.y - drop.length, drop.position.x, drop.position.y);
     });
