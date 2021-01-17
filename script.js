@@ -1,3 +1,9 @@
+function randomInteger(min, max) {
+    const realMin = Math.min(min, max);
+    const realMax = Math.max(min, max);
+    return realMin + Math.floor(Math.random() * (realMax - realMin));
+}
+
 class Drop {
     constructor(x, y, speedX, speedY, length) {
         this.speed = createVector(speedX, speedY);
@@ -57,14 +63,14 @@ const settings = {
 
 const randomPositionStrategy = {
     getPosition: () => ({
-        x: random(screenEdges.left, screenEdges.right),
-        y: random(screenEdges.top, screenEdges.bottom),
+        x: randomInteger(screenEdges.left, screenEdges.right),
+        y: randomInteger(screenEdges.top, screenEdges.bottom),
     }),
 };
 
 const topPositionStrategy = {
     getPosition: () => ({
-        x: random(screenEdges.left, screenEdges.right),
+        x: randomInteger(screenEdges.left, screenEdges.right),
         y: 0,
     }),
 }
@@ -87,9 +93,10 @@ function updateScreenSize() {
 
 function createDrop(positionStrategy) {
     const { x, y } = positionStrategy.getPosition();
+    const { initialMinSpeed, initialMaxSpeed, minLength, maxLength } = settings.rainDrop;
     const speedX = 0;
-    const speedY = random(settings.rainDrop.initialMinSpeed, settings.rainDrop.initialMaxSpeed);
-    const length = random(settings.rainDrop.minLength, settings.rainDrop.maxLength);
+    const speedY = random(initialMinSpeed, initialMaxSpeed);
+    const length = randomInteger(minLength, maxLength);
     return new Drop(x, y, speedX, speedY, length);
 }
 
@@ -195,8 +202,8 @@ function generateGUISettings() {
     gui.add(settings, 'gravityForce', 0.01, 0.1).step(0.01);
 
     const dropFolder = gui.addFolder('Drop');
-    dropFolder.add(settings.rainDrop, 'minLength', 2, 12).step(1);
-    dropFolder.add(settings.rainDrop, 'maxLength', 12, 30).step(1);
+    dropFolder.add(settings.rainDrop, 'minLength', 2, 30).step(1);
+    dropFolder.add(settings.rainDrop, 'maxLength', 2, 30).step(1);
     dropFolder.add(settings.rainDrop, 'width', 1, 5).step(1);
     dropFolder.open();
 
