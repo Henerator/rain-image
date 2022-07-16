@@ -76,10 +76,9 @@ const topPositionStrategy = {
 }
 
 function updateScreenSize() {
-    const bodyRect = document.body.getBoundingClientRect();
     screenSize = {
-        width: bodyRect.width,
-        height: bodyRect.height,
+        width: window.innerWidth,
+        height: window.innerHeight,
     };
     resizeCanvas(screenSize.width, screenSize.height)
 
@@ -112,19 +111,19 @@ function getRGBColorString(r, g, b) {
 }
 
 function getImageEdges(image) {
-    const centerX = screenSize.width / 2;
+    const centerX = Math.floor(screenSize.width / 2);
     const imageScale = screenSize.height / image.height;
 
     const scaledImageSize = {
-        width: image.width * imageScale,
-        height: image.height * imageScale,
+        width: Math.floor(image.width * imageScale),
+        height: Math.floor(image.height * imageScale),
     };
 
     return {
         top: 0,
         bottom: scaledImageSize.height,
-        left: centerX - scaledImageSize.width / 2,
-        right: centerX + scaledImageSize.width / 2,
+        left: centerX - Math.floor(scaledImageSize.width / 2),
+        right: centerX + Math.floor(scaledImageSize.width / 2),
         width: scaledImageSize.width,
         height: scaledImageSize.height,
     };
